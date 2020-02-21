@@ -5,8 +5,8 @@ class ApplicationController < ActionController::Base
 
   # helper method to authenticate user
   def authenticate
-    @user = User.find_by_id(request.headers['UUID'])
-    if @user.present?
+    @current_user = User.find_by_id(request.headers['UUID'])
+    if @current_user.present?
       if User.validate_token(request.headers['UUID'], request.headers['Authentication'])
         return true
       else

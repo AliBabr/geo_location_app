@@ -4,9 +4,9 @@ class UserMailer < ApplicationMailer
   default from: 'spur@gmail.com'
   #Makin email
   def forgot_password(user, token)
-    @user = user
+    @current_user = user
     @token = token
-    @url = reset_api_v1_user_url(@user.id, tokens: token)
+    @url = reset_api_v1_user_url(@current_user.id, tokens: token)
     mail to: user.email, subject: 'Forgot passowrd'
   end
 end

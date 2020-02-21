@@ -5,8 +5,8 @@ class Api::V1::NotificationsController < ApplicationController
 
   # methode that enable disable user notification status
   def toggle_notification
-    @user.update(notification_params)
-    if @user.errors.any?
+    @current_user.update(notification_params)
+    if @current_user.errors.any?
       render json: user.errors.messages, status: 400
     else
       render json: { message: 'Notifications are Successfully Updated!' }, status: 200

@@ -16,9 +16,9 @@
       <input type="submit" class="fadeIn fourth reset-submit-button" value="Save" onClick="validatePassword();"  >
     </form>
 
-    <% if @user.present? %>
-      <% if @user.errors.any? %>
-        <% @user.errors.full_messages.each do |message| %>
+    <% if @current_user.present? %>
+      <% if @current_user.errors.any? %>
+        <% @current_user.errors.full_messages.each do |message| %>
           <li class="errors"><%= message %></li>
         <% end %>
       <% end %>

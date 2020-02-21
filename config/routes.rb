@@ -5,12 +5,12 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :users do
         collection do
-          post :sign_in
+          get :sign_in
           post :sign_up
-          post :log_out
-          post :update_password
-          post :update_account
-          post :forgot_password
+          put :log_out
+          put :update_password
+          put :update_account
+          put :forgot_password
           post :reset_password
           get :get_user
         end
@@ -18,12 +18,11 @@ Rails.application.routes.draw do
           get :reset
         end
       end
-      post '/notifications/toggle_notification', to: 'notifications#toggle_notification'
-      resources :places, only: :index
-      resources :history, only: [:create, :index]
-      end
+      post "/notifications/toggle_notification", to: "notifications#toggle_notification"
+      # resources :places, only: :index
+      # resources :history, only: [:create, :index]
     end
+  end
 
   root to: "home#index"
-
 end

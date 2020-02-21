@@ -2,7 +2,7 @@
 class Places
   def initialize(params, current_user)
     @params = params
-    @user=current_user
+    @current_user=current_user
     # Default Values
     @radius = '100'
     @price_level = '2'
@@ -42,7 +42,7 @@ class Places
 
   # Choose a place From searched places
   def choose_place(places)
-    userPlaceIds=@user.histories.pluck(:place_id)
+    userPlaceIds=@current_user.histories.pluck(:place_id)
     selectPlace=places.select do |place|
       !userPlaceIds.include?(place["place_id"])
     end
