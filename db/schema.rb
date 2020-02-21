@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_11_24_204236) do
+ActiveRecord::Schema.define(version: 2020_02_21_085328) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -37,8 +37,6 @@ ActiveRecord::Schema.define(version: 2019_11_24_204236) do
   end
 
   create_table "users", id: :serial, force: :cascade do |t|
-    t.string "first_name"
-    t.string "last_name"
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
@@ -49,6 +47,14 @@ ActiveRecord::Schema.define(version: 2019_11_24_204236) do
     t.string "authentication_token", limit: 30
     t.string "reset_token"
     t.boolean "notification_status", default: false
+    t.string "name"
+    t.string "city"
+    t.string "phone"
+    t.string "category"
+    t.string "coach_type"
+    t.string "about"
+    t.string "background"
+    t.integer "role"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
