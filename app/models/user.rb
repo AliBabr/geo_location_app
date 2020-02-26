@@ -6,10 +6,13 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_one_attached :profile_photo
+  belongs_to :leason_type, optional: true
+  belongs_to :category, optional: true
 
   enum role: {
     "Coach" => 1,
     "Student" => 2,
+    "Admin" => 3,
   }
 
   private

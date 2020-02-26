@@ -18,6 +18,18 @@ Rails.application.routes.draw do
           get :reset
         end
       end
+      resources :types do
+        collection do
+          put :update_type
+          delete :destroy_type
+        end
+      end
+      resources :categories do
+        collection do
+          put :update_category
+          delete :destroy_category
+        end
+      end
       post "/notifications/toggle_notification", to: "notifications#toggle_notification"
       # resources :places, only: :index
       # resources :history, only: [:create, :index]

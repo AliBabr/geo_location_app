@@ -41,11 +41,16 @@ class Api::V1::UsersController < ApplicationController
   # Method which accepts parameters from user and save data in db
   def sign_up
     user = User.new(user_params); user.id = SecureRandom.uuid # genrating secure uuid token
+    if params[:role].present? && params[:role] == "Coach"
+      set_type_n_category
+      user.category_id = @category.id
+      user.leason_type_id = @type.id
+    end
     if user.save
       image_url = ""
       image_url = url_for(user.profile_photo) if user.profile_photo.attached?
       if user.role == "Coach"
-        render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, coach_type: user.coach_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
+        render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, type: user.leason_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
       else
         render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
       end
@@ -167,6 +172,13 @@ class Api::V1::UsersController < ApplicationController
       true
     else
       render json: { message: "Provide valid user ID" }, status: 400
+    end
+  end
+
+  def set_type_n_category
+    if (params[:type_id].present? && LeasonType.find_by_id(params[:type_id]).present?) && (params[:category_id].present? && Category.find_by_id(params[:category_id]).present?)
+      @category = Category.find_by_id(params[:category_id])
+      @type = LeasonType.find_by_id(params[:type_id])
     end
   end
 end
