@@ -30,6 +30,14 @@ Rails.application.routes.draw do
           delete :destroy_category
         end
       end
+      resources :lessons do
+        collection do
+          put :update_lesson
+          delete :destroy_lesson
+          get :get_lesson
+        end
+      end
+
       post "/notifications/toggle_notification", to: "notifications#toggle_notification"
       # resources :places, only: :index
       # resources :history, only: [:create, :index]

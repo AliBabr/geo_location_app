@@ -14,7 +14,7 @@ class Api::V1::UsersController < ApplicationController
         image_url = ""
         image_url = url_for(user.profile_photo) if user.profile_photo.attached?
         if user.role == "Coach"
-          render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, coach_type: user.coach_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
+          render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, type: user.leason_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
         else
           render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
         end
@@ -30,7 +30,7 @@ class Api::V1::UsersController < ApplicationController
     image_url = ""
     image_url = url_for(@user.profile_photo) if @user.profile_photo.attached?
     if @user.role == "Coach"
-      render json: { user_id: @user.id, email: @user.email, name: @user.name, phone: @user.phone, profile_photo: image_url, city: @user.city, about: @user.about, background: @user.background, category: @user.category, coach_type: @user.coach_type, role: @user.role }, status: 200
+      render json: { user_id: @user.id, email: @user.email, name: @user.name, phone: @user.phone, profile_photo: image_url, city: @user.city, about: @user.about, background: @user.background, category: @user.category, type: @user.leason_type, role: @user.role }, status: 200
     else
       render json: { user_id: @user.id, email: @user.email, name: @user.name, phone: @user.phone, profile_photo: image_url, city: @user.city, role: @user.role }, status: 200
     end
@@ -78,7 +78,7 @@ class Api::V1::UsersController < ApplicationController
       image_url = ""
       image_url = url_for(@current_user.profile_photo) if @current_user.profile_photo.attached?
       if @current_user.role == "Coach"
-        render json: { current_user_id: @current_user.id, email: @current_user.email, name: @current_user.name, phone: @current_user.phone, profile_photo: image_url, city: @current_user.city, about: @current_user.about, background: @current_user.background, category: @current_user.category, coach_type: @current_user.coach_type }, status: 200
+        render json: { current_user_id: @current_user.id, email: @current_user.email, name: @current_user.name, phone: @current_user.phone, profile_photo: image_url, city: @current_user.city, about: @current_user.about, background: @current_user.background, category: @current_user.category, type: @current_user.leason_type }, status: 200
       else
         render json: { current_user_id: @current_user.id, email: @current_user.email, name: @current_user.name, phone: @current_user.phone, profile_photo: image_url, city: @current_user.city }, status: 200
       end
@@ -138,7 +138,7 @@ class Api::V1::UsersController < ApplicationController
   private
 
   def user_params # permit user params
-    params.permit(:email, :password, :name, :city, :profile_photo, :phone, :category, :coach_type, :about, :background, :role)
+    params.permit(:email, :password, :name, :city, :profile_photo, :phone, :about, :background, :role)
   end
 
   # Helper method for forgot password method

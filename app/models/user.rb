@@ -6,6 +6,7 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable
 
   has_one_attached :profile_photo
+  has_many :lessons
   belongs_to :leason_type, optional: true
   belongs_to :category, optional: true
 
