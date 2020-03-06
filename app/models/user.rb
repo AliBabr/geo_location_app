@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_many :lessons
   belongs_to :leason_type, optional: true
   belongs_to :category, optional: true
+  has_many :bookings
 
   enum role: {
     "Coach" => 1,
