@@ -38,6 +38,24 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :payments do
+        collection do
+          put :process_payment
+          put :add_card_token
+        end
+      end
+
+      resources :bookings do
+        collection do
+          put :update_booking
+          delete :destroy_booking
+          get :get_booking
+          get :get_coach_booking_requests
+          get :get_student_bookings
+          put :accept_or_decline_booking
+        end
+      end
+
       post "/notifications/toggle_notification", to: "notifications#toggle_notification"
       # resources :places, only: :index
       # resources :history, only: [:create, :index]
