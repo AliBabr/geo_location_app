@@ -38,6 +38,14 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :news do
+        collection do
+          put :update_news
+          delete :destroy_news
+          get :get_news
+        end
+      end
+
       resources :payments do
         collection do
           put :process_payment
