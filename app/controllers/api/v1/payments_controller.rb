@@ -6,18 +6,22 @@ class Api::V1::PaymentsController < ApplicationController
   before_action :set_booking, only: %i[process_payment]
 
   def process_payment
-    user = @booking.user
-    lesson = @booking.lesson
-    if user.stripe_cutomer_id.present?
-      response = StripePayment.new(user).donate(@booking.price, user.stripe_cutomer_id)
-      if response.present?
-        @booking.update(payment_status: "sent", booking_status: "active")
-        render json: { message: "Payemnt has been sent successfully..!" }
+    if @booking.request_status == "accept"
+      user = @booking.user
+      lesson = @booking.lesson
+      if user.stripe_cutomer_id.present?
+        response = StripePayment.new(user).donate(@booking.price, user.stripe_cutomer_id)
+        if response.present?
+          @booking.update(payment_status: "sent", booking_status: "active")
+          render json: { message: "Payemnt has been sent successfully..!" }
+        else
+          render json: { message: "Something went wrong please check your card token" }
+        end
       else
-        render json: { message: "Something went wrong please check your card token" }
+        render json: { message: "Please Add first user card token..!" }, status: 400
       end
     else
-      render json: { message: "Please Add first user card token..!" }, status: 400
+      render json: { message: "First Coach has to accept the booking..!" }
     end
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request

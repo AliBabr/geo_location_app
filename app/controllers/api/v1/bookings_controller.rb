@@ -11,6 +11,7 @@ class Api::V1::BookingsController < ApplicationController
     booking = Booking.new(booking_params)
     booking.user_id = @current_user.id
     booking.lesson_id = @lesson.id
+    booking.booking_status = "inactive"
     booking.payment_status = "pending"
     booking.request_status = "sent"
     booking.coach_id = @lesson.user.id

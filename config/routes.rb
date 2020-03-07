@@ -45,6 +45,15 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :sessions do
+        collection do
+          get :get_student_active_sessions
+          get :get_sessions_sorted_by_dates
+          get :get_session_by_date
+          get :get_session_by_id
+        end
+      end
+
       resources :bookings do
         collection do
           put :update_booking
