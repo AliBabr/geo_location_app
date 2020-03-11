@@ -35,6 +35,7 @@ Rails.application.routes.draw do
           put :update_lesson
           delete :destroy_lesson
           get :get_lesson
+          put :add_favorite
         end
       end
 
@@ -79,6 +80,10 @@ Rails.application.routes.draw do
         collection do
           get :get_coach
           get :get_coach_lessons
+          put :add_favorite
+          get :search_by_name
+          get :search_by_category
+          get :get_by_category
         end
       end
 

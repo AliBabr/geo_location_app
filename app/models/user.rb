@@ -19,6 +19,14 @@ class User < ApplicationRecord
 
   private
 
+  def self.search(pattern)
+    if pattern.blank? # blank? covers both nil and empty string
+      where(role: "Coach")
+    else
+      where("name LIKE ?", "%#{pattern}%")
+    end
+  end
+
   def after_successful_token_authentication
     # Make the authentication token to be disposable - for example
     renew_authentication_token!
