@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 class Api::V1::LessonsController < ApplicationController
   before_action :authenticate
-  before_action :is_coach
-  before_action :set_lesson, only: %i[destroy_lesson update_lesson get_lesson]
+  before_action :is_coach, except: [:add_favorite]
+  before_action :set_lesson, only: %i[destroy_lesson update_lesson get_lesson add_favorite]
 
   def create
     lesson = Lesson.new(lesson_params)
@@ -49,6 +49,18 @@ class Api::V1::LessonsController < ApplicationController
     @lesson.destroy
     render json: { message: "lesson deleted successfully!" }, status: 200
   rescue StandardError => e # rescu if any exception occure
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def add_favorite
+    if @lesson.fav_count.present?
+      count = @lesson.fav_count
+    else
+      count = 0
+    end
+    @lesson.update(fav_count: count + 1)
+    render json: { message: "Added favorites successfully..!" }
+  rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
