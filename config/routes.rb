@@ -73,6 +73,15 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :ratings
+
+      resources :coaches do
+        collection do
+          get :get_coach
+          get :get_coach_lessons
+        end
+      end
+
       post "/notifications/toggle_notification", to: "notifications#toggle_notification"
       # resources :places, only: :index
       # resources :history, only: [:create, :index]
