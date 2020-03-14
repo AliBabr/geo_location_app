@@ -2,8 +2,8 @@
 class Api::V1::MessagesController < ApplicationController
   before_action :authenticate
   before_action :set_message, only: %i[destroy_message update_message]
-  before_action :set_conversation, only: %i[send_message]
-  before_action :set_message, only: %i[update_status]
+  before_action :set_conversation, only: %i[send_message index]
+  before_action :set_message, only: %i[update_status get_meesage]
 
   def send_message
     message = Message.new(message_params)
@@ -31,6 +31,24 @@ class Api::V1::MessagesController < ApplicationController
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
+  def get_meesage
+    media_url = ""
+    media_url = url_for(@message.media) if @message.media.attached?
+    sender = User.find_by_id(@message.sender_id)
+    receiver = User.find_by_id(@message.receiver_id)
+
+    sender_profile_photo = ""
+    receiver_profile_photo = ""
+    sender_profile_photo = url_for(sender.profile_photo) if sender.profile_photo.attached?
+    receiver_profile_photo = url_for(receiver.profile_photo) if receiver.profile_photo.attached?
+
+    if media_url.present?
+      render json: { message_id: @message.id, conversation_id: @message.conversation.id, sender_id: @message.sender_id, receiver_id: @message.receiver_id, sender_profile_photo: sender_profile_photo, receiver_profile_photo: receiver_profile_photo, media: media_url, sender_name: sender.name, receiver_name: receiver.name }, status: 200
+    else
+      render json: { message_id: @message.id, conversation_id: @message.conversation.id, sender_id: @message.sender_id, receiver_id: @message.receiver_id, sender_profile_photo: sender_profile_photo, receiver_profile_photo: receiver_profile_photo, text: @message.text, sender_name: sender.name, receiver_name: receiver.name }, status: 200
+    end
+  end
+
   def update_status
     if params[:status].present?
       @message.update(status: params[:status])
@@ -44,19 +62,41 @@ class Api::V1::MessagesController < ApplicationController
     end
   end
 
-  # def index
-  #   categories = message.all; all_Categories = []
-  #   categories.each do |message|
-  #     media_url = ""
-  #     media_url = url_for(message.media) if message.media.attached?
-  #     all_Categories << { message_id: message.id, conversation_id: @conversation.id, name: message.name, color: message.color, description: message.description, media: media_url }
-  #   end
-  #   render json: all_Categories, status: 200
-  # rescue StandardError => e
-  #   render json: { message: "Error: Something went wrong... " }, status: :bad_request
-  # end
+  def get_meeages
+  end
 
-  # private
+  def index
+    categories = Message.all; all_Categories = []
+    messages = @conversation.messages.order("created_at DESC")
+    all_messages = []
+    messages.each do |message|
+      media_url = ""
+      media_url = url_for(message.media) if message.media.attached?
+      sender = User.find_by_id(message.sender_id)
+      receiver = User.find_by_id(message.receiver_id)
+
+      sender_profile_photo = ""
+      receiver_profile_photo = ""
+      sender_profile_photo = url_for(sender.profile_photo) if sender.profile_photo.attached?
+      receiver_profile_photo = url_for(receiver.profile_photo) if receiver.profile_photo.attached?
+
+      if media_url.present?
+        all_messages << { message_id: message.id, conversation_id: @conversation.id, sender_id: message.sender_id, receiver_id: message.receiver_id, sender_profile_photo: sender_profile_photo, receiver_profile_photo: receiver_profile_photo, media: media_url, sender_name: sender.name, receiver_name: receiver.name }
+      else
+        all_messages << { message_id: message.id, conversation_id: @conversation.id, sender_id: message.sender_id, receiver_id: message.receiver_id, sender_profile_photo: sender_profile_photo, receiver_profile_photo: receiver_profile_photo, text: message.text, sender_name: sender.name, receiver_name: receiver.name }
+      end
+    end
+
+    if params[:page].present?
+      render json: all_messages.paginate(:page => params[:page], :per_page => 15)
+    else
+      render json: all_messages.paginate(:page => 1, :per_page => 20)
+    end
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  private
 
   def set_message # instance methode for message
     @message = Message.find_by_id(params[:message_id])

@@ -86,6 +86,7 @@ Rails.application.routes.draw do
         collection do
           post :send_message
           put :update_status
+          get :get_meesage
         end
       end
 
