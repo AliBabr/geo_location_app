@@ -79,6 +79,7 @@ Rails.application.routes.draw do
         collection do
           post :connect
           delete :destroy_conversation
+          get :list_conversation
         end
       end
 
@@ -87,6 +88,8 @@ Rails.application.routes.draw do
           post :send_message
           put :update_status
           get :get_meesage
+          put :mark_all_read
+          get :get_user_unread_messages
         end
       end
 

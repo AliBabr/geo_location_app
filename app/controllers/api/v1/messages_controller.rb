@@ -2,7 +2,7 @@
 class Api::V1::MessagesController < ApplicationController
   before_action :authenticate
   before_action :set_message, only: %i[destroy_message update_message]
-  before_action :set_conversation, only: %i[send_message index]
+  before_action :set_conversation, only: %i[send_message index mark_all_read]
   before_action :set_message, only: %i[update_status get_meesage]
 
   def send_message
@@ -49,9 +49,16 @@ class Api::V1::MessagesController < ApplicationController
     end
   end
 
+  def mark_all_read
+    @conversation.messages.update_all(status: "read")
+    render json: { messages: "All messages marked read" }, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
   def update_status
     if params[:status].present?
-      @message.update(status: params[:status])
+      @message.update(status: "read")
       if @message.errors.any?
         render json: @message.errors.messages, status: 400
       else
@@ -60,9 +67,6 @@ class Api::V1::MessagesController < ApplicationController
     else
       render json: { message: "please provide status" }, status: 400
     end
-  end
-
-  def get_meeages
   end
 
   def index
@@ -92,6 +96,13 @@ class Api::V1::MessagesController < ApplicationController
     else
       render json: all_messages.paginate(:page => 1, :per_page => 20)
     end
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def get_user_unread_messages
+    messages = Message.where(receiver_id: @current_user.id, status: "unread")
+    render json: { messages: "Total unread messages: #{messages.count}" }
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end

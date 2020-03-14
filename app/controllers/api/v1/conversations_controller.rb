@@ -3,6 +3,7 @@ class Api::V1::ConversationsController < ApplicationController
   before_action :authenticate
   before_action :set_conversation, only: %i[destroy_conversation]
   before_action :check_converstaion, only: %i[connect]
+  before_action :set_user, only: %i[list_conversation]
 
   def connect
     @conversation = check_converstaion
@@ -39,6 +40,31 @@ class Api::V1::ConversationsController < ApplicationController
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
+  def list_conversation
+    all_conversation = []
+    conversation1 = Conversation.where(user_1: @user.id)
+    conversation2 = Conversation.where(user_2: @user.id)
+    conversations = conversation1 + conversation2
+    conversations = conversations.uniq
+    conversations.each do |conversation|
+      if conversation.user_1 == @current_user.id
+        sender = User.find_by_id(conversation.user_1)
+        receiver = User.find_by_id(conversation.user_2)
+      else
+        sender = User.find_by_id(conversation.user_2)
+        receiver = User.find_by_id(conversation.user_1)
+      end
+      conversation_name = receiver.name
+      sender_profile_photo = ""
+      receiver_profile_photo = ""
+      sender_profile_photo = url_for(sender.profile_photo) if sender.profile_photo.attached?
+      receiver_profile_photo = url_for(receiver.profile_photo) if receiver.profile_photo.attached?
+      unread_messages = conversation.messages.where(status: "unread").count
+      all_conversation << { conversation_id: conversation.id, conversation_name: conversation_name, sender_profile_photo: sender_profile_photo, receiver_profile_photo: receiver_profile_photo, sender_name: sender.name, receiver_name: receiver.name, sender_id: sender.id, receiver_id: receiver.id, unread_messages: unread_messages }
+    end
+    render json: all_conversation, status: 200
+  end
+
   private
 
   def set_conversation # instance methode for conversation
@@ -54,11 +80,12 @@ class Api::V1::ConversationsController < ApplicationController
     params.permit(:user_1, :user_2)
   end
 
-  def is_admin
-    if @current_user.role == "Admin"
+  def set_user
+    @user = User.find_by_id(params[:user_id])
+    if @user.present?
       true
     else
-      render json: { message: "Only admin can create/update/destroy Categories!" }
+      render json: { message: "Provide valid user ID" }, status: 400
     end
   end
 
