@@ -75,6 +75,23 @@ Rails.application.routes.draw do
       end
 
       resources :ratings
+      resources :conversations do
+        collection do
+          post :connect
+          delete :destroy_conversation
+          get :list_conversation
+        end
+      end
+
+      resources :messages do
+        collection do
+          post :send_message
+          put :update_status
+          get :get_meesage
+          put :mark_all_read
+          get :get_user_unread_messages
+        end
+      end
 
       resources :coaches do
         collection do
