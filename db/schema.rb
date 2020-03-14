@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_03_11_143029) do
+ActiveRecord::Schema.define(version: 2020_03_14_120819) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -59,6 +59,13 @@ ActiveRecord::Schema.define(version: 2020_03_11_143029) do
     t.integer "total_steps", default: 0
   end
 
+  create_table "conversations", force: :cascade do |t|
+    t.string "user_1"
+    t.string "user_2"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "leason_types", force: :cascade do |t|
     t.string "name"
     t.text "description"
@@ -79,6 +86,16 @@ ActiveRecord::Schema.define(version: 2020_03_11_143029) do
     t.bigint "leason_type_id"
     t.string "user_id"
     t.integer "fav_count"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.text "text"
+    t.integer "status", default: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "conversation_id"
+    t.string "sender_id"
+    t.string "receiver_id"
   end
 
   create_table "news", force: :cascade do |t|

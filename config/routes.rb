@@ -75,6 +75,19 @@ Rails.application.routes.draw do
       end
 
       resources :ratings
+      resources :conversations do
+        collection do
+          post :connect
+          delete :destroy_conversation
+        end
+      end
+
+      resources :messages do
+        collection do
+          post :send_message
+          put :update_status
+        end
+      end
 
       resources :coaches do
         collection do
