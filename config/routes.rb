@@ -51,6 +51,8 @@ Rails.application.routes.draw do
         collection do
           put :process_payment
           put :add_card_token
+          put :tranfer
+          put :add_connected_account
         end
       end
 
@@ -93,6 +95,12 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :callings do
+        collection do
+          get :my_calling_history
+        end
+      end
+
       resources :coaches do
         collection do
           get :get_coach
@@ -101,6 +109,10 @@ Rails.application.routes.draw do
           get :search_by_name
           get :search_by_category
           get :get_by_category
+          get :get_coach_total_fav
+          get :get_coach_total_earnig
+          get :get_student_spent_money
+          get :get_coach_sessions
         end
       end
 

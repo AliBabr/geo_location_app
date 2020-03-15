@@ -2,6 +2,8 @@
 class Api::V1::CoachesController < ApplicationController
   before_action :authenticate
   before_action :set_coach, only: %i[get_coach get_coach_lessons add_favorite]
+  before_action :is_coach, only: %i[get_coach_total_fav get_coach_total_earnig get_coach_sessions]
+  before_action :is_student, only: %i[get_student_spent_money]
 
   def get_coach
     ratings = []
@@ -97,6 +99,44 @@ class Api::V1::CoachesController < ApplicationController
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
+  def get_coach_total_fav
+    fav = @current_user.fav_count
+    render json: { total_fav: fav }, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def get_coach_total_earnig
+    bookings = Booking.where(coach_id: @current_user.id, booking_status: "done")
+    price = bookings.pluck(:price)
+    total_eraning = price.sum
+    render json: { total: total_eraning }, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def get_coach_sessions
+    all_sessions = []
+    bookings = Booking.where(coach_id: @current_user.id, booking_status: "done")
+    bookings.each do |booking|
+      image_url = ""
+      image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
+      all_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking }
+    end
+    render json: { sessions: all_sessions }, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def get_student_spent_money
+    bookings = @current_user.bookings.where(booking_status: "done")
+    price = bookings.pluck(:price)
+    total_eraning = price.sum
+    render json: { total: total_eraning }, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
   private
 
   def set_coach # instance methode for category
@@ -105,6 +145,22 @@ class Api::V1::CoachesController < ApplicationController
       return true
     else
       render json: { message: "Coach Not found!" }, status: 404
+    end
+  end
+
+  def is_coach
+    if @current_user.role == "Coach"
+      true
+    else
+      render json: { message: "Only Coach can perform this action!" }
+    end
+  end
+
+  def is_student
+    if @current_user.role == "Student"
+      true
+    else
+      render json: { message: "Only student can perform this action!" }
     end
   end
 end
