@@ -93,6 +93,12 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :callings do
+        collection do
+          get :my_calling_history
+        end
+      end
+
       resources :coaches do
         collection do
           get :get_coach
