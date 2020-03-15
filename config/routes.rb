@@ -107,6 +107,10 @@ Rails.application.routes.draw do
           get :search_by_name
           get :search_by_category
           get :get_by_category
+          get :get_coach_total_fav
+          get :get_coach_total_earnig
+          get :get_student_spent_money
+          get :get_coach_sessions
         end
       end
 
