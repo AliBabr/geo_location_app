@@ -28,4 +28,20 @@ class StripePayment
       return false
     end
   end
+
+  def tranfer(price, token)
+    response = payment_intent = Stripe::PaymentIntent.create({
+      payment_method_types: ["card"],
+      amount: price,
+      currency: "usd",
+      transfer_data: {
+        destination: token,
+      },
+    })
+    if response.present?
+      return response
+    else
+      return nil
+    end
+  end
 end

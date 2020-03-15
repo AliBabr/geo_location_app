@@ -3,7 +3,8 @@ class Api::V1::PaymentsController < ApplicationController
   before_action :authenticate
   before_action :set_user, only: %i[add_card_token]
   before_action :is_student, only: %i[add_card_token]
-  before_action :set_booking, only: %i[process_payment]
+  before_action :is_coach, only: %i[add_connected_account]
+  before_action :set_booking, only: %i[process_payment tranfer]
 
   def process_payment
     if @booking.request_status == "accept"
@@ -38,6 +39,35 @@ class Api::V1::PaymentsController < ApplicationController
     else
       render json: { message: "Please provide card token" }
     end
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def add_connected_account
+    if params[:connected_account_id].present?
+      @current_user.update(connected_account_id: params[:connected_account_id])
+      render json: { message: "Token saved successfully!" }, status: 200
+    else
+      render json: { message: "Please provide connected accoutn id..!" }, status: 400
+    end
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def tranfer
+    coach = User.find_by_id(@booking.coach_id)
+    price = @booking.price
+    percentage = (15.to_f / price.to_f) * 100
+    price = price - percentage
+    response = StripePayment.new(@current_user).tranfer(price.to_i, coach.connected_account_id)
+    if response.present?
+      @booking.update(booking_status: "done")
+      render json: { message: "Amount transfered successfully..!" }, status: 200
+    else
+      render json: { message: "Please provide valid connected account..!" }, status: 401
+    end
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong...#{e} " }, status: :bad_request
   end
 
   private
@@ -55,12 +85,25 @@ class Api::V1::PaymentsController < ApplicationController
     if @current_user.role == "Student"
       true
     else
-      render json: { message: "Only Student add card token...!" }, status: 400
+      render json: { message: "Only Student can add card token...!" }, status: 400
+    end
+  end
+
+  def is_coach
+    if @current_user.role == "Coach"
+      true
+    else
+      render json: { message: "Only Coach can add connected account...!" }, status: 400
     end
   end
 
   def set_booking # instance methode for lesson
-    @booking = Booking.find_by_id(params[:booking_id])
+    @booking = ""
+    if params[:booking_id].present?
+      @booking = Booking.find_by_id(params[:booking_id])
+    elsif params[:session_id].present?
+      @booking = Booking.find_by_id(params[:session_id])
+    end
     if @booking.present?
       return true
     else

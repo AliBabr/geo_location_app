@@ -51,6 +51,8 @@ Rails.application.routes.draw do
         collection do
           put :process_payment
           put :add_card_token
+          put :tranfer
+          put :add_connected_account
         end
       end
 
