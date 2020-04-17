@@ -16,12 +16,14 @@ gem "figaro"
 # Use pry for debugging purposes
 gem "pry"
 gem "slim-rails"
-gem "rename"
 gem "stripe", "~> 5.7.1"
 gem "stripe_event"
 gem "pager_api"
 gem "pagy"
 gem "will_paginate", "~> 3.1.0"
+gem "aws-sdk"
+gem "rename"
+gem "rack-cors"
 # Use Puma as the app server
 gem "puma", "~> 3.11"
 # Use SCSS for stylesheets
