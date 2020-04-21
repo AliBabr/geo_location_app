@@ -121,6 +121,8 @@ Rails.application.routes.draw do
         collection do
           get :all_coaches
           get :all_coach_data
+          get :all_students
+          get :all_student_data
         end
       end
 
