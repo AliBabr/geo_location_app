@@ -13,6 +13,7 @@ Rails.application.routes.draw do
           put :forgot_password
           post :reset_password
           get :get_user
+          delete :delete_account
         end
         member do
           get :reset

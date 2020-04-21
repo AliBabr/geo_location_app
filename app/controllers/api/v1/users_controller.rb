@@ -1,8 +1,8 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :authenticate, only: %i[update_account update_password user_data log_out get_user] # callback for validating user
+  before_action :authenticate, only: %i[update_account update_password user_data log_out get_user delete_account] # callback for validating user
   before_action :forgot_validation, only: [:forgot_password]
   before_action :before_reset, only: [:reset_password]
-  before_action :set_user, only: [:get_user]
+  before_action :set_user, only: %i[get_user delete_account]
 
   # Method which accept credential from user and sign in and return user data with authentication token
   def sign_in
@@ -41,10 +41,13 @@ class Api::V1::UsersController < ApplicationController
   # Method which accepts parameters from user and save data in db
   def sign_up
     user = User.new(user_params); user.id = SecureRandom.uuid # genrating secure uuid token
+    debugger
     if params[:role].present? && params[:role] == "Coach"
       set_type_n_category
-      user.category_id = @category.id
-      user.leason_type_id = @type.id
+      if @category.present? && @type.present?
+        user.category_id = @category.id
+        user.leason_type_id = @type.id
+      end
     end
     if user.save
       image_url = ""
@@ -68,6 +71,14 @@ class Api::V1::UsersController < ApplicationController
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
+
+  def delete_account
+    @user.destroy
+    render json: { message: "account deleted successfully!" }, status: 200
+  rescue StandardError => e # rescu if any exception occure
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
 
   # Method take parameters and update user account
   def update_account
@@ -108,6 +119,8 @@ class Api::V1::UsersController < ApplicationController
     @token = params[:tokens]
     @id = params[:id]
   end
+
+  
 
   # Method that send email while user forgot password
   def forgot_password
