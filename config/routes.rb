@@ -48,6 +48,12 @@ Rails.application.routes.draw do
         end
       end
 
+      resources :images do
+        collection do
+          delete :destroy_image
+        end
+      end
+
       resources :payments do
         collection do
           put :process_payment
