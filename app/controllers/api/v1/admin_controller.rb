@@ -3,8 +3,7 @@ class Api::V1::AdminController < ApplicationController
     before_action :authenticate
     before_action :set_coach, only: %i[all_coach_data]
     before_action :set_student, only: %i[all_student_data]
-    before_action :is_coach, only: %i[get_coach_total_fav get_coach_total_earnig get_coach_sessions]
-    before_action :is_student, only: %i[get_student_spent_money]
+    before_action :set_booking, only: %i[session_users_data]
   
     def all_coaches
       all_coaches = []
@@ -106,6 +105,52 @@ class Api::V1::AdminController < ApplicationController
       end
     end
 
+    def all_sessions
+      @done_sessions = []
+      bookings = Booking.where( booking_status: "done")
+      bookings.each do |booking|
+        image_url = ""
+        image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
+        @done_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking }
+      end
+
+      @active_sessions = []
+      bookings = Booking.where( booking_status: "active")
+      bookings.each do |booking|
+        image_url = ""
+        image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
+        @active_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking }
+      end
+      render json: {done_sessions: @done_sessions, active_sessions: @active_sessions}, status: 200
+    rescue StandardError => e
+      render json: { message: "Error: Something went wrong... " }, status: :bad_request
+    end
+
+    def session_users_data
+      coache_data = []
+      student_data = []
+      student = @booking.user
+      coach = User.find_by_id(@booking.coach_id)
+
+      image_url = ""
+      bookings = Booking.where(coach_id: coach.id, booking_status: "done")
+      price = bookings.pluck(:price)
+      total_eraning = price.sum
+      image_url = url_for(coach.profile_photo) if coach.profile_photo.attached?
+      coache_data << { coach_id: coach.id, email: coach.email, name: coach.name, phone: coach.phone, profile_photo: image_url, city: coach.city, about: coach.about, background: coach.background, category: coach.category, type: coach.leason_type, rating: coach.rating, fav_count: coach.fav_count, earning: total_eraning }
+
+      image_url = ""
+      bookings = student.bookings.where(booking_status: "done")
+      price = bookings.pluck(:price)
+      total_eraning = price.sum
+      image_url = url_for(student.profile_photo) if student.profile_photo.attached?
+      student_data << { student_id: student.id, email: student.email, name: student.name, phone: student.phone, profile_photo: image_url, city: student.city, about: student.about, background: student.background, category: student.category, type: student.leason_type, rating: student.rating, fav_count: coach.fav_count, total_spent: total_eraning }
+
+      render json: {coache_data: coache_data, student_data: student_data}, status: 200
+    rescue StandardError => e
+      render json: { message: "Error: Something went wrong... " }, status: :bad_request
+    end
+
 
     def get_student_active_sessions
       @student_active_bookings = []
@@ -160,6 +205,15 @@ class Api::V1::AdminController < ApplicationController
     end
   
     private
+
+    def set_booking
+      @booking = Booking.find_by_id(params[:id])
+      if @booking.present?
+        return true
+      else
+        render json: { message: "Coach Not found!" }, status: 404
+      end
+    end
   
     def set_coach # instance methode for category
       @coach = User.find_by_id(params[:coach_id])
