@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_21_165904) do
+ActiveRecord::Schema.define(version: 2020_04_25_143225) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -72,6 +72,13 @@ ActiveRecord::Schema.define(version: 2020_04_21_165904) do
   create_table "conversations", force: :cascade do |t|
     t.string "user_1"
     t.string "user_2"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "favorites", force: :cascade do |t|
+    t.string "student_id"
+    t.string "coach_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

@@ -41,7 +41,6 @@ class Api::V1::UsersController < ApplicationController
   # Method which accepts parameters from user and save data in db
   def sign_up
     user = User.new(user_params); user.id = SecureRandom.uuid # genrating secure uuid token
-    debugger
     if params[:role].present? && params[:role] == "Coach"
       set_type_n_category
       if @category.present? && @type.present?

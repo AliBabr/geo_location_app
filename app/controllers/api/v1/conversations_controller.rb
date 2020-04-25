@@ -55,12 +55,13 @@ class Api::V1::ConversationsController < ApplicationController
         receiver = User.find_by_id(conversation.user_1)
       end
       conversation_name = receiver.name
+      last_message = conversation.messages.order('created_at desc').first
       sender_profile_photo = ""
       receiver_profile_photo = ""
       sender_profile_photo = url_for(sender.profile_photo) if sender.profile_photo.attached?
       receiver_profile_photo = url_for(receiver.profile_photo) if receiver.profile_photo.attached?
       unread_messages = conversation.messages.where(status: "unread").count
-      all_conversation << { conversation_id: conversation.id, conversation_name: conversation_name, sender_profile_photo: sender_profile_photo, receiver_profile_photo: receiver_profile_photo, sender_name: sender.name, receiver_name: receiver.name, sender_id: sender.id, receiver_id: receiver.id, unread_messages: unread_messages }
+      all_conversation << { conversation_id: conversation.id, conversation_name: conversation_name, sender_profile_photo: sender_profile_photo, receiver_profile_photo: receiver_profile_photo, sender_name: sender.name, receiver_name: receiver.name, sender_id: sender.id, receiver_id: receiver.id, unread_messages: unread_messages, last_message: last_message }
     end
     render json: all_conversation, status: 200
   end

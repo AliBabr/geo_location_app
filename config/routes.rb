@@ -120,6 +120,12 @@ Rails.application.routes.draw do
           get :get_coach_total_earnig
           get :get_student_spent_money
           get :get_coach_sessions
+          put :add_into_fav_coaches
+          get :my_fav_coaches
+          delete :remove_fav_coache
+          get :get_student_completes_sessions
+          get :get_student_spent_money_on_this_month
+          get :get_coach_earn_money_on_this_month
         end
       end
 
