@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 class Api::V1::CoachesController < ApplicationController
   before_action :authenticate
-  before_action :set_coach, only: %i[get_coach get_coach_lessons add_favorite add_into_fav_coaches remove_fav_coache get_coach_earn_money_on_this_month]
+  before_action :set_coach, only: %i[get_coach get_coach_lessons add_favorite add_into_fav_coaches remove_fav_coache get_coach_earn_money_on_this_month get_coach_all_sessions]
   before_action :set_student, only: %i[add_into_fav_coaches remove_fav_coache my_fav_coaches get_student_completes_sessions get_student_spent_money_on_this_month]
 
   before_action :is_coach, only: %i[get_coach_total_fav get_coach_total_earnig get_coach_sessions ]
@@ -212,6 +212,33 @@ class Api::V1::CoachesController < ApplicationController
     price = bookings.pluck(:price)
     total_eraning = price.sum
     render json: { total: total_eraning, month: (Time.now).strftime("%B")  }, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def total_session_createded_by_coach
+    favs = Favorite.where(student_id: @student.id)
+    all_fav = []
+    favs.each do |f|
+      fav = User.find_by_id(f.coach_id)
+      image_url = ""
+      image_url = url_for(fav.profile_photo) if fav.profile_photo.attached?
+      all_fav << { coach_id: fav.id, email: fav.email, name: fav.name, phone: fav.phone, profile_photo: image_url, city: fav.city, about: fav.about, background: fav.background, category: fav.category, type: fav.leason_type, role: fav.role }
+    end
+    render json: all_fav, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def get_coach_all_sessions
+    all_sessions = []
+    bookings = Booking.where(coach_id: @coach.id)
+    bookings.each do |booking|
+      image_url = ""
+      image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
+      all_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking }
+    end
+    render json: { sessions: all_sessions, total: all_sessions.count }, status: 200
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end

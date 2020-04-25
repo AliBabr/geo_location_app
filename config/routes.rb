@@ -126,6 +126,7 @@ Rails.application.routes.draw do
           get :get_student_completes_sessions
           get :get_student_spent_money_on_this_month
           get :get_coach_earn_money_on_this_month
+          get :get_coach_all_sessions
         end
       end
 
