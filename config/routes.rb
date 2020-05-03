@@ -69,6 +69,7 @@ Rails.application.routes.draw do
           get :get_sessions_sorted_by_dates
           get :get_session_by_date
           get :get_session_by_id
+          put :cancel_session
         end
       end
 
@@ -127,6 +128,8 @@ Rails.application.routes.draw do
           get :get_student_spent_money_on_this_month
           get :get_coach_earn_money_on_this_month
           get :get_coach_all_sessions
+          get :get_student_active_sessions_on_this_month
+          get :coach_of_the_week
         end
       end
 

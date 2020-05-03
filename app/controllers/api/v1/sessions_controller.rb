@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 class Api::V1::SessionsController < ApplicationController
   before_action :authenticate
+  before_action :set_booking, only: %i[cancel_session]
+
 
   def get_student_active_sessions
     active_bookings = []
@@ -71,5 +73,27 @@ class Api::V1::SessionsController < ApplicationController
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
+  def cancel_session
+      status = 'cancel'
+      @booking.update(request_status: status)
+      if @booking.errors.any?
+        render json: @booking.errors.messages, status: 400
+      else
+        render json: { message: "Session has been canceled..!" }, status: 200
+      end
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+
   private
+
+  def set_booking # instance methode for lesson
+    @booking = Booking.find_by_id(params[:session_id])
+    if @booking.present?
+      return true
+    else
+      render json: { message: "Booking Not found!" }, status: 404
+    end
+  end
 end

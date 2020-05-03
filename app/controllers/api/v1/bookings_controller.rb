@@ -4,7 +4,7 @@ class Api::V1::BookingsController < ApplicationController
   before_action :is_student, only: %i[create]
   before_action :is_coach, only: %i[accept_or_decline_booking]
   before_action :set_user, only: %i[get_coach_booking_requests get_student_bookings]
-  before_action :set_booking, only: %i[accept_or_decline_booking update_booking get_booking destroy_booking]
+  before_action :set_booking, only: %i[accept_or_decline_booking update_booking get_booking destroy_booking cancel_booking]
   before_action :set_lesson, only: %i[create]
 
   def create
