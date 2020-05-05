@@ -167,10 +167,21 @@ class Api::V1::CoachesController < ApplicationController
   favs = Favorite.where(student_id: @student.id)
   all_fav = []
   favs.each do |f|
-    fav = User.find_by_id(f.coach_id)
+    coach = User.find_by_id(f.coach_id)
+    fav = Favorite.where(student_id: @student.id, coach_id: coach.id)
+    if fav.present?
+      fav = true
+    else
+      fav = false
+    end
+    ratings = []
+    all_ratings = Rating.where(coach_id: coach.id)
+    all_ratings.each do |rating|
+      ratings << { rating_id: rating.id, review: rating.review, rate: rating.rate }
+    end
     image_url = ""
-    image_url = url_for(fav.profile_photo) if fav.profile_photo.attached?
-    all_fav << { coach_id: fav.id, email: fav.email, name: fav.name, phone: fav.phone, profile_photo: image_url, city: fav.city, about: fav.about, background: fav.background, category: fav.category, type: fav.leason_type, role: fav.role }
+    image_url = url_for(coach.profile_photo) if coach.profile_photo.attached?
+    all_fav << { coach_id: coach.id, email: coach.email, name: coach.name, phone: coach.phone, profile_photo: image_url, city: coach.city, about: coach.about, background: coach.background, category: coach.category, type: coach.leason_type, role: coach.role, all_ratings: ratings, averrage_rating: coach.rating, fav_count: coach.fav_count, is_my_fav: fav }
   end
   render json: all_fav, status: 200
   rescue StandardError => e
