@@ -257,12 +257,21 @@ class Api::V1::CoachesController < ApplicationController
   end
 
   def coach_of_the_week
-    coach = []
-    user = User.where(is_coach_of_the_week: true, role: 'Coach').first
+    @coach = User.where(is_coach_of_the_week: true, role: 'Coach').first
+    fav = Favorite.where(student_id: @current_user.id, coach_id: @coach.id)
+    if fav.present?
+      fav = true
+    else
+      fav = false
+    end
+    ratings = []
+    all_ratings = Rating.where(coach_id: @coach.id)
+    all_ratings.each do |rating|
+      ratings << { rating_id: rating.id, review: rating.review, rate: rating.rate }
+    end
     image_url = ""
-    image_url = url_for(user.profile_photo) if user.profile_photo.attached?
-    coach << { coach_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, type: user.leason_type, role: user.role }
-    render json: { coach: coach }, status: 200
+    image_url = url_for(@coach.profile_photo) if @coach.profile_photo.attached?
+    render json: { coach_id: @coach.id, email: @coach.email, name: @coach.name, phone: @coach.phone, profile_photo: image_url, city: @coach.city, about: @coach.about, background: @coach.background, category: @coach.category, type: @coach.leason_type, role: @coach.role, all_ratings: ratings, averrage_rating: @coach.rating, fav_count: @coach.fav_count, is_my_fav: fav }, status: 200
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
