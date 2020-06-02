@@ -7,6 +7,7 @@ class User < ApplicationRecord
 
   has_one_attached :profile_photo
   has_many :lessons
+  has_many :slots
   belongs_to :leason_type, optional: true
   belongs_to :category, optional: true
   has_many :bookings

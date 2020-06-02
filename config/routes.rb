@@ -25,6 +25,15 @@ Rails.application.routes.draw do
           delete :destroy_type
         end
       end
+
+      resources :slots do
+        collection do
+          put :update_slot
+          get :my_slots
+          delete :destroy_slot
+        end
+      end
+
       resources :categories do
         collection do
           put :update_category

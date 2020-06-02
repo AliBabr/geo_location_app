@@ -1,28 +1,38 @@
 # frozen_string_literal: true
 class Api::V1::BookingsController < ApplicationController
   before_action :authenticate
-  before_action :is_student, only: %i[create]
+  # before_action :is_student, only: %i[create]
   before_action :is_coach, only: %i[accept_or_decline_booking]
   before_action :set_user, only: %i[get_coach_booking_requests get_student_bookings]
   before_action :set_booking, only: %i[accept_or_decline_booking update_booking get_booking destroy_booking cancel_booking]
   before_action :set_lesson, only: %i[create]
 
   def create
-    booking = Booking.new(booking_params)
-    booking.user_id = @current_user.id
-    booking.lesson_id = @lesson.id
-    booking.booking_status = "inactive"
-    booking.payment_status = "pending"
-    booking.request_status = "sent"
-    booking.coach_id = @lesson.user.id
-    booking.price = @lesson.price
-    if booking.save
-      render json: { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: @lesson.leason_type, category: @lesson.category }, status: 200
+    coach = User.find_by_id(@lesson.user.id)
+    start_t = params[:start_time].to_time 
+    end_t = params[:end_time].to_time
+    slot = coach.slots.where(day: start_t.day).first
+
+    if ( slot.present? && (slot.start_time.strftime("%I:%M%p") <= start_t.strftime("%I:%M%p") && slot.end_time.strftime("%I:%M%p") >= start_t.strftime("%I:%M%p")) && (slot.end_time.strftime("%I:%M%p") >= end_t.strftime("%I:%M%p")))
+
+      booking = Booking.new(booking_params)
+      booking.user_id = @current_user.id
+      booking.lesson_id = @lesson.id
+      booking.booking_status = "inactive"
+      booking.payment_status = "pending"
+      booking.request_status = "sent"
+      booking.coach_id = @lesson.user.id
+      booking.price = @lesson.price
+      if booking.save
+        render json: { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: @lesson.leason_type, category: @lesson.category }, status: 200
+      else
+        render json: booking.errors.messages, status: 400
+      end
     else
-      render json: booking.errors.messages, status: 400
+      render json: {message: 'Coach is not available at your selected time..!'}
     end
   rescue StandardError => e
-    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+    render json: { message: "Error: Something went wrong...#{e} " }, status: :bad_request
   end
 
   def get_coach_booking_requests
