@@ -125,9 +125,20 @@ class Api::V1::UsersController < ApplicationController
   def forgot_password
     user = User.find_by_email(params[:email])
     if user.present?
-      UserMailer.forgot_password(user, @token).deliver
-      render json: { message: "Please check your Email for reset password!" }, status: 200
-      @current_user.update(reset_token: @token)
+      if params[:password].present? && params[:confirm_password].present?
+        if params[:password] == params[:confirm_password]
+          user.update(password: params[:password], password_confirmation: params[:confirm_password])
+          if user.errors.any?
+            render json: user.errors.messages, status: 400
+          else
+            render json: {message: 'Password reset successfully'}, status: 200
+          end
+        else
+          render json: {message: 'Password and confirm password should match'}, status: 400
+        end
+      else
+        render json: {message: 'Password and confirm password can not be blank'}, status: 400
+      end
     else
       render json: { message: "User not found with provided email..!" }, status: 400
     end
@@ -146,6 +157,8 @@ class Api::V1::UsersController < ApplicationController
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
+
+
 
   private
 

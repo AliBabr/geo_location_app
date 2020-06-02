@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 class Api::V1::CoachesController < ApplicationController
   before_action :authenticate
-  before_action :set_coach, only: %i[get_coach get_coach_lessons add_favorite add_into_fav_coaches remove_fav_coache get_coach_earn_money_on_this_month get_coach_all_sessions]
-  before_action :set_student, only: %i[add_into_fav_coaches remove_fav_coache my_fav_coaches get_student_completes_sessions get_student_spent_money_on_this_month get_student_active_sessions_on_this_month]
+  before_action :set_coach, only: %i[get_coach get_coach_lessons add_favorite add_into_fav_coaches remove_fav_coache get_coach_earn_money_on_this_month get_coach_all_sessions get_student_and_coach_active_sessions]
+  before_action :set_student, only: %i[add_into_fav_coaches remove_fav_coache my_fav_coaches get_student_completes_sessions get_student_spent_money_on_this_month get_student_active_sessions_on_this_month get_student_and_coach_active_sessions]
 
   before_action :is_coach, only: %i[get_coach_total_fav get_coach_total_earnig get_coach_sessions ]
   before_action :is_student, only: %i[get_student_spent_money]
@@ -256,6 +256,20 @@ class Api::V1::CoachesController < ApplicationController
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
+
+  def get_student_and_coach_active_sessions
+    all_sessions = []
+    bookings = @student.bookings.where(booking_status: "active", coach_id: @coach.id)
+    bookings.each do |booking|
+      image_url = ""
+      image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
+      all_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking, coach_id: booking.coach_id }
+    end
+    render json: { sessions: all_sessions  }, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
   def coach_of_the_week
     @coach = User.where(is_coach_of_the_week: true, role: 'Coach').first
     fav = Favorite.where(student_id: @current_user.id, coach_id: @coach.id)
@@ -275,9 +289,7 @@ class Api::V1::CoachesController < ApplicationController
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
-
-
-
+  
   private
 
   def set_coach # instance methode for category

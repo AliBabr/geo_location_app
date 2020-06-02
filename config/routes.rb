@@ -45,6 +45,7 @@ Rails.application.routes.draw do
           put :update_news
           delete :destroy_news
           get :get_news
+          get :get_home_news
         end
       end
 
@@ -130,6 +131,7 @@ Rails.application.routes.draw do
           get :get_coach_all_sessions
           get :get_student_active_sessions_on_this_month
           get :coach_of_the_week
+          get :get_student_and_coach_active_sessions
         end
       end
 

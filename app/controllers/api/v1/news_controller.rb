@@ -25,6 +25,20 @@ class Api::V1::NewsController < ApplicationController
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
+
+  def get_home_news
+    @news = News.first
+    image_url = ""
+    image_url = url_for(@news.image) if @news.image.attached?
+    video = ""
+    if @news.news_video.present?
+      video = url_for(@news.news_video.video) if @news.news_video.video.attached?
+    end
+    render json: { news_id: @news.id, title: @news.title, full_text: @news.full_text, news_type: @news.news_type, post_url: @news.post_url, image: image_url, video: video }, status: 200
+  rescue StandardError => e # rescu if any exception occure
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
   def update_news
     @news.update(news_params)
     if params[:video].present? && @news.news_video.present?
