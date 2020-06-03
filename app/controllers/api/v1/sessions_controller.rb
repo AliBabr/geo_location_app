@@ -4,15 +4,23 @@ class Api::V1::SessionsController < ApplicationController
   before_action :set_booking, only: %i[cancel_session]
 
 
-  def get_student_active_sessions
+  def get_student_active_sessions    
     active_bookings = []
     bookings = @current_user.bookings.where(booking_status: "active")
     bookings.each do |booking|
+      call_flag = ''
+      time_array = time_diff(booking.start_time, Time.now).split(':')
+      if time_array.first.to_i > 0 || time_array.second.to_i >= 5
+        call_flag = false
+      else
+        call_flag = true
+      end
+
       total_booking = @current_user.bookings.where(coach_id: booking.coach_id)
       percentage = (total_booking.count % 10) * 10
       image_url = ""
       image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
-      active_bookings << { session_id: booking.id, lesson: booking.lesson, percentage: percentage, image: image_url, color: booking.lesson.category.color }
+      active_bookings << { session_id: booking.id, lesson: booking.lesson, percentage: percentage, image: image_url, color: booking.lesson.category.color, call_flag: call_flag, bookings: booking }
     end
     render json: active_bookings, status: 200
   rescue StandardError => e

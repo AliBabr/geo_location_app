@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 class Api::V1::CoachesController < ApplicationController
   before_action :authenticate
-  before_action :set_coach, only: %i[get_coach get_coach_lessons add_favorite add_into_fav_coaches remove_fav_coache get_coach_earn_money_on_this_month get_coach_all_sessions get_student_and_coach_active_sessions]
+  before_action :set_coach, only: %i[get_coach get_coach_lessons add_favorite add_into_fav_coaches remove_fav_coache get_coach_earn_money_on_this_month get_coach_all_sessions get_student_and_coach_active_sessions get_coach_active_sessions]
   before_action :set_student, only: %i[add_into_fav_coaches remove_fav_coache my_fav_coaches get_student_completes_sessions get_student_spent_money_on_this_month get_student_active_sessions_on_this_month get_student_and_coach_active_sessions]
 
   before_action :is_coach, only: %i[get_coach_total_fav get_coach_total_earnig get_coach_sessions ]
@@ -270,6 +270,27 @@ class Api::V1::CoachesController < ApplicationController
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
+  def get_coach_active_sessions
+    all_sessions = []
+    bookings = Booking.where(booking_status: "active", coach_id: @coach.id)
+    bookings.each do |booking|
+      call_flag = ''
+      time_array = time_diff(booking.start_time, Time.now).split(':')
+      if time_array.first.to_i > 0 || time_array.second.to_i >= 5
+        call_flag = false
+      else
+        call_flag = true
+      end
+      image_url = ""
+      image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
+      all_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking, coach_id: booking.coach_id , call_flag: call_flag}
+    end
+    render json: { sessions: all_sessions  }, status: 200
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+
   def coach_of_the_week
     @coach = User.where(is_coach_of_the_week: true, role: 'Coach').first
     fav = Favorite.where(student_id: @current_user.id, coach_id: @coach.id)
@@ -324,5 +345,21 @@ class Api::V1::CoachesController < ApplicationController
     else
       render json: { message: "Only student can perform this action!" }
     end
+  end
+
+  def time_diff(start_time, end_time)
+    seconds_diff = (start_time - end_time).to_i.abs
+  
+    hours = seconds_diff / 3600
+    seconds_diff -= hours * 3600
+  
+    minutes = seconds_diff / 60
+    seconds_diff -= minutes * 60
+  
+    seconds = seconds_diff
+  
+    "#{hours.to_s.rjust(2, '0')}:#{minutes.to_s.rjust(2, '0')}:#{seconds.to_s.rjust(2, '0')}"
+    # or, as hagello suggested in the comments:
+    # '%02d:%02d:%02d' % [hours, minutes, seconds]
   end
 end

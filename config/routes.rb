@@ -141,6 +141,7 @@ Rails.application.routes.draw do
           get :get_student_active_sessions_on_this_month
           get :coach_of_the_week
           get :get_student_and_coach_active_sessions
+          get :get_coach_active_sessions
         end
       end
 
