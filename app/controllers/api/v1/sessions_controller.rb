@@ -74,16 +74,21 @@ class Api::V1::SessionsController < ApplicationController
   end
 
   def cancel_session
-      status = 'cancel'
-      @booking.update(request_status: status)
+    time_array = time_diff(@booking.start_time, Time.now).split(':')
+    if time_array.first.to_i > 0 || time_array.second.to_i >= 5
+      @booking.update(request_status: 'cancel', booking_status: 'cancel')
       if @booking.errors.any?
         render json: @booking.errors.messages, status: 400
       else
-        render json: { message: "Session has been canceled..!" }, status: 200
+        render json: { message: "Session has been canceled!" }, status: 200
       end
+    else
+      render json: { message: "Session is about to start you can not cancel before 5 mintues" }, status: 200
+    end
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
+
 
 
   private
@@ -95,5 +100,21 @@ class Api::V1::SessionsController < ApplicationController
     else
       render json: { message: "Booking Not found!" }, status: 404
     end
+  end
+
+  def time_diff(start_time, end_time)
+    seconds_diff = (start_time - end_time).to_i.abs
+  
+    hours = seconds_diff / 3600
+    seconds_diff -= hours * 3600
+  
+    minutes = seconds_diff / 60
+    seconds_diff -= minutes * 60
+  
+    seconds = seconds_diff
+  
+    "#{hours.to_s.rjust(2, '0')}:#{minutes.to_s.rjust(2, '0')}:#{seconds.to_s.rjust(2, '0')}"
+    # or, as hagello suggested in the comments:
+    # '%02d:%02d:%02d' % [hours, minutes, seconds]
   end
 end
