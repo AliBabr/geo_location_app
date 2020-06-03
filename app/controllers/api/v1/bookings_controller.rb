@@ -11,10 +11,17 @@ class Api::V1::BookingsController < ApplicationController
     coach = User.find_by_id(@lesson.user.id)
     start_t = params[:start_time].to_time 
     end_t = params[:end_time].to_time
-    slot = coach.slots.where(day: start_t.day).first
+    slots = coach.slots.where(day: start_t.wday)
 
-    if ( slot.present? && (slot.start_time.strftime("%I:%M%p") <= start_t.strftime("%I:%M%p") && slot.end_time.strftime("%I:%M%p") >= start_t.strftime("%I:%M%p")) && (slot.end_time.strftime("%I:%M%p") >= end_t.strftime("%I:%M%p")))
+    slot_flag = false
 
+    slots.each do |slot|
+      if ( slot.present? && (slot.start_time.strftime("%I:%M%p") <= start_t.strftime("%I:%M%p") && slot.end_time.strftime("%I:%M%p") >= start_t.strftime("%I:%M%p")) && (slot.end_time.strftime("%I:%M%p") >= end_t.strftime("%I:%M%p")))
+        slot_flag = true
+      end
+    end
+
+    if slot_flag
       booking = Booking.new(booking_params)
       booking.user_id = @current_user.id
       booking.lesson_id = @lesson.id
