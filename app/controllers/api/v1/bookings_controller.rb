@@ -3,9 +3,12 @@ class Api::V1::BookingsController < ApplicationController
   before_action :authenticate
   # before_action :is_student, only: %i[create]
   before_action :is_coach, only: %i[accept_or_decline_booking]
-  before_action :set_user, only: %i[get_coach_booking_requests get_student_bookings]
+  before_action :set_user, only: %i[get_coach_booking_requests  ]
   before_action :set_booking, only: %i[accept_or_decline_booking update_booking get_booking destroy_booking ]
   before_action :set_lesson, only: %i[create]
+
+  before_action :set_coach, only: %i[get_student_bookings]
+  before_action :set_student, only: %i[get_student_bookings]
 
   def create
     coach = User.find_by_id(@lesson.user.id)
@@ -55,7 +58,7 @@ class Api::V1::BookingsController < ApplicationController
 
   def get_student_bookings
     all_requests = []
-    bookings = @user.bookings
+    bookings = @student.bookings.where(coach_id: @coach.id)
     bookings.each do |booking|
       all_requests << { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, request_status: booking.request_status, payment_sttus: booking.payment_status, lesson: booking.lesson, type: booking.lesson.leason_type, category: booking.lesson.category }
     end
@@ -71,6 +74,9 @@ class Api::V1::BookingsController < ApplicationController
       if @booking.errors.any?
         render json: @booking.errors.messages, status: 400
       else
+        if @booking.request_status == 'accept'
+          @booking.update(booking_status: "active")
+        end
         render json: { message: "Booking request status has been saved..!" }, status: 200
       end
     else
@@ -150,6 +156,24 @@ class Api::V1::BookingsController < ApplicationController
       return true
     else
       render json: { message: "User Not found!" }, status: 404
+    end
+  end
+
+  def set_coach # instance methode for category
+    @coach = User.find_by_id(params[:coach_id])
+    if @coach.present?
+      return true
+    else
+      render json: { message: "Coach Not found!" }, status: 404
+    end
+  end
+
+  def set_student # instance methode for category
+    @student = User.find_by_id(params[:student_id])
+    if @student.present?
+      return true
+    else
+      render json: { message: "student Not found!" }, status: 404
     end
   end
 
