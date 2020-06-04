@@ -2,6 +2,8 @@
 class Api::V1::SlotsController < ApplicationController
   before_action :authenticate
   before_action :set_slot, only: %i[destroy_slot update_slot]
+  before_action :set_coach, only: %i[my_slots]
+
 
   def create
     slot = Slot.new(slot_params)
@@ -37,7 +39,7 @@ class Api::V1::SlotsController < ApplicationController
 
   def my_slots
     monday = []; tuesday = []; wednesday = []; thursday = []; friday = []; saturday = []; sunday = [];
-    slots = @current_user.slots; all_slots = []
+    slots = @coach.slots; all_slots = []
     monday_slots = slots.where(day: 'Monday')
     tuesday_slots = slots.where(day: 'Tuesday')
     wednesday_slots = slots.where(day: 'Wednesday')
@@ -127,6 +129,15 @@ class Api::V1::SlotsController < ApplicationController
 
   def slot_params
     params.permit(:day, :start_time, :end_time)
+  end
+
+  def set_coach # instance methode for category
+    @coach = User.find_by_id(params[:coach_id])
+    if @coach.present?
+      return true
+    else
+      render json: { message: "Coach Not found!" }, status: 404
+    end
   end
 
 end

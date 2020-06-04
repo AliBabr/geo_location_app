@@ -11,35 +11,41 @@ class Api::V1::BookingsController < ApplicationController
   before_action :set_student, only: %i[get_student_bookings]
 
   def create
-    coach = User.find_by_id(@lesson.user.id)
-    start_t = params[:start_time].to_time 
-    end_t = params[:end_time].to_time
-    slots = coach.slots.where(day: start_t.wday)
+    same_bookings = @lesson.bookings.where(start_time: params[:start_time]).uniq
+    total_spots = same_bookings.count 
+    if total_spots < @lesson.spots
+      coach = User.find_by_id(@lesson.user.id)
+      start_t = params[:start_time].to_time 
+      end_t = params[:end_time].to_time
+      slots = coach.slots.where(day: start_t.wday)
 
-    slot_flag = false
+      slot_flag = false
 
-    slots.each do |slot|
-      if ( slot.present? && (slot.start_time.strftime("%I:%M%p") <= start_t.strftime("%I:%M%p") && slot.end_time.strftime("%I:%M%p") >= start_t.strftime("%I:%M%p")) && (slot.end_time.strftime("%I:%M%p") >= end_t.strftime("%I:%M%p")))
-        slot_flag = true
+      slots.each do |slot|
+        if ( slot.present? && (slot.start_time.strftime("%I:%M%p") <= start_t.strftime("%I:%M%p") && slot.end_time.strftime("%I:%M%p") >= start_t.strftime("%I:%M%p")) && (slot.end_time.strftime("%I:%M%p") >= end_t.strftime("%I:%M%p")))
+          slot_flag = true
+        end
       end
-    end
 
-    if slot_flag
-      booking = Booking.new(booking_params)
-      booking.user_id = @current_user.id
-      booking.lesson_id = @lesson.id
-      booking.booking_status = "inactive"
-      booking.payment_status = "pending"
-      booking.request_status = "sent"
-      booking.coach_id = @lesson.user.id
-      booking.price = @lesson.price
-      if booking.save
-        render json: { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: @lesson.leason_type, category: @lesson.category }, status: 200
+      if slot_flag
+        booking = Booking.new(booking_params)
+        booking.user_id = @current_user.id
+        booking.lesson_id = @lesson.id
+        booking.booking_status = "inactive"
+        booking.payment_status = "pending"
+        booking.request_status = "sent"
+        booking.coach_id = @lesson.user.id
+        booking.price = @lesson.price
+        if booking.save
+          render json: { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: @lesson.leason_type, category: @lesson.category }, status: 200
+        else
+          render json: booking.errors.messages, status: 400
+        end
       else
-        render json: booking.errors.messages, status: 400
+        render json: {message: 'Coach is not available at your selected time..!'}, status: 400
       end
     else
-      render json: {message: 'Coach is not available at your selected time..!'}
+      render json: {message: 'All spots are booked'}, status: 400
     end
   rescue StandardError => e
     render json: { message: "Error: Something went wrong...#{e} " }, status: :bad_request
@@ -49,7 +55,7 @@ class Api::V1::BookingsController < ApplicationController
     all_requests = []
     bookings = Booking.where(coach_id: @user.id, request_status: "sent")
     bookings.each do |booking|
-      all_requests << { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: booking.lesson.leason_type, category: booking.lesson.category }
+      all_requests << { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: booking.lesson.leason_type, category: booking.lesson.category, student: booking.user }
     end
     render json: all_requests, status: 200
   rescue StandardError => e

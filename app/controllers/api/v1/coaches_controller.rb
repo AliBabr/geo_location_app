@@ -274,6 +274,11 @@ class Api::V1::CoachesController < ApplicationController
     all_sessions = []
     bookings = Booking.where(booking_status: "active", coach_id: @coach.id)
     bookings.each do |booking|
+      same_bookings = bookings.where(start_time: booking.start_time).uniq
+      users = []
+      same_bookings.each do |same_booking|
+        users << {student: booking.user}
+      end
       call_flag = ''
       time_array = time_diff(booking.start_time, Time.now).split(':')
       if time_array.first.to_i > 0 || time_array.second.to_i >= 5
@@ -283,7 +288,7 @@ class Api::V1::CoachesController < ApplicationController
       end
       image_url = ""
       image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
-      all_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking, coach_id: booking.coach_id , call_flag: call_flag}
+      all_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking, coach_id: booking.coach_id , call_flag: call_flag, students: users}
     end
     render json: { sessions: all_sessions  }, status: 200
   rescue StandardError => e

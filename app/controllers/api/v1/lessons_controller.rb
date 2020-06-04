@@ -10,7 +10,7 @@ class Api::V1::LessonsController < ApplicationController
     lesson.category_id = @current_user.category.id
     lesson.leason_type_id = @current_user.leason_type.id
     if lesson.save
-      render json: { lesson_id: lesson.id, title: lesson.title, price: lesson.price, description: lesson.description, availability: lesson.availability, duration: lesson.duration, category: lesson.category, type: lesson.leason_type }, status: 200
+      render json: { lesson_id: lesson.id, title: lesson.title, price: lesson.price, description: lesson.description, availability: lesson.availability, duration: lesson.duration, category: lesson.category, type: lesson.leason_type, spots: lesson.spots }, status: 200
     else
       render json: lesson.errors.messages, status: 400
     end
@@ -23,14 +23,14 @@ class Api::V1::LessonsController < ApplicationController
     if @lesson.errors.any?
       render json: @lesson.errors.messages, status: 400
     else
-      render json: { lesson_id: @lesson.id, title: @lesson.title, price: @lesson.price, description: @lesson.description, availability: @lesson.availability, duration: @lesson.duration, category: @lesson.category, type: @lesson.leason_type }, status: 200
+      render json: { lesson_id: @lesson.id, title: @lesson.title, price: @lesson.price, description: @lesson.description, availability: @lesson.availability, duration: @lesson.duration, category: @lesson.category, type: @lesson.leason_type, spots: @lesson.spots }, status: 200
     end
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
   def get_lesson
-    render json: { lesson_id: @lesson.id, title: @lesson.title, price: @lesson.price, description: @lesson.description, availability: @lesson.availability, duration: @lesson.duration, category: @lesson.category, type: @lesson.leason_type }, status: 200
+    render json: { lesson_id: @lesson.id, title: @lesson.title, price: @lesson.price, description: @lesson.description, availability: @lesson.availability, duration: @lesson.duration, category: @lesson.category, type: @lesson.leason_type, spots: @lesson.spots }, status: 200
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
@@ -38,7 +38,7 @@ class Api::V1::LessonsController < ApplicationController
   def index
     lessons = Lesson.all; all_lessons = []
     lessons.each do |lesson|
-      all_lessons << { lesson_id: lesson.id, title: lesson.title, price: lesson.price, description: lesson.description, availability: lesson.availability, duration: lesson.duration, category: lesson.category, type: lesson.leason_type }
+      all_lessons << { lesson_id: lesson.id, title: lesson.title, price: lesson.price, description: lesson.description, availability: lesson.availability, duration: lesson.duration, category: lesson.category, type: lesson.leason_type, spots: lesson.spots }
     end
     render json: all_lessons, status: 200
   rescue StandardError => e
@@ -76,7 +76,7 @@ class Api::V1::LessonsController < ApplicationController
   end
 
   def lesson_params
-    params.permit(:title, :description, :price, :availability, :duration)
+    params.permit(:title, :description, :price, :availability, :duration, :spots)
   end
 
   def is_coach

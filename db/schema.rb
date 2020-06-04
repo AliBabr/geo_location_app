@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_02_202028) do
+ActiveRecord::Schema.define(version: 2020_06_04_190051) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -109,6 +109,7 @@ ActiveRecord::Schema.define(version: 2020_06_02_202028) do
     t.bigint "leason_type_id"
     t.string "user_id"
     t.integer "fav_count"
+    t.integer "spots", default: 5
   end
 
   create_table "messages", force: :cascade do |t|
@@ -181,6 +182,7 @@ ActiveRecord::Schema.define(version: 2020_06_02_202028) do
     t.float "rating"
     t.integer "fav_count"
     t.boolean "is_coach_of_the_week", default: false
+    t.string "twilio_token"
     t.index ["authentication_token"], name: "index_users_on_authentication_token", unique: true
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

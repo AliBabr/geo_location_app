@@ -2,7 +2,7 @@ class Api::V1::UsersController < ApplicationController
   before_action :authenticate, only: %i[update_account update_password user_data log_out get_user delete_account] # callback for validating user
   before_action :forgot_validation, only: [:forgot_password]
   before_action :before_reset, only: [:reset_password]
-  before_action :set_user, only: %i[get_user delete_account]
+  before_action :set_user, only: %i[get_user delete_account add_twilio_token]
 
   # Method which accept credential from user and sign in and return user data with authentication token
   def sign_in
@@ -14,9 +14,9 @@ class Api::V1::UsersController < ApplicationController
         image_url = ""
         image_url = url_for(user.profile_photo) if user.profile_photo.attached?
         if user.role == "Coach"
-          render json: { user_id: user.id, role: user.role , email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, type: user.leason_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
+          render json: { user_id: user.id, role: user.role , email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, twilio_token: user.twilio_token , type: user.leason_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
         else
-          render json: { user_id: user.id, role: user.role, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
+          render json: { user_id: user.id, role: user.role, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, twilio_token: user.twilio_token, city: user.city, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
         end
       else
         render json: { message: "No Email and Password matching that account were found" }, status: 400
@@ -30,7 +30,7 @@ class Api::V1::UsersController < ApplicationController
     image_url = ""
     image_url = url_for(@user.profile_photo) if @user.profile_photo.attached?
     if @user.role == "Coach"
-      render json: { user_id: @user.id, email: @user.email, name: @user.name, phone: @user.phone, profile_photo: image_url, city: @user.city, about: @user.about, background: @user.background, category: @user.category, type: @user.leason_type, role: @user.role }, status: 200
+      render json: { user_id: @user.id, email: @user.email, name: @user.name, phone: @user.phone, profile_photo: image_url, city: @user.city, about: @user.about, background: @user.background, category: @user.category, type: @user.leason_type, role: @user.role, twilio_token: @user.twilio_token }, status: 200
     else
       render json: { user_id: @user.id, email: @user.email, name: @user.name, phone: @user.phone, profile_photo: image_url, city: @user.city, role: @user.role }, status: 200
     end
@@ -52,9 +52,9 @@ class Api::V1::UsersController < ApplicationController
       image_url = ""
       image_url = url_for(user.profile_photo) if user.profile_photo.attached?
       if user.role == "Coach"
-        render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, type: user.leason_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
+        render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone , twilio_token: user.twilio_token, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, type: user.leason_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
       else
-        render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
+        render json: { user_id: user.id, email: user.email, name: user.name, phone: user.phone , twilio_token: user.twilio_token, profile_photo: image_url, city: user.city, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
       end
     else
       render json: user.errors.messages, status: 400
@@ -76,6 +76,23 @@ class Api::V1::UsersController < ApplicationController
     render json: { message: "account deleted successfully!" }, status: 200
   rescue StandardError => e # rescu if any exception occure
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
+  end
+
+  def add_twilio_token
+    @user.update(user_params)
+    if @user.errors.any?
+      render json: @user.errors.messages, status: 400
+    else
+      image_url = ""
+      image_url = url_for(@user.profile_photo) if @user.profile_photo.attached?
+      if @user.role == "Coach"
+        render json: { current_user_id: @user.id, email: @user.email, name: @user.name, phone: @user.phone, profile_photo: image_url, city: @user.city, twilio_token: @user.twilio_token, about: @user.about, background: @user.background, category: @user.category, type: @user.leason_type }, status: 200
+      else
+        render json: { current_user_id: @user.id, email: @user.email, name: @user.name, phone: @user.phone, profile_photo: image_url, city: @user.city , twilio_token: @user.twilio_token }, status: 200
+      end
+    end
+  rescue StandardError => e
+    render json: { message: "Error: Something went wrong... #{e}" }, status: :bad_request
   end
 
 
@@ -163,7 +180,7 @@ class Api::V1::UsersController < ApplicationController
   private
 
   def user_params # permit user params
-    params.permit(:email, :password, :name, :city, :profile_photo, :phone, :about, :background, :role)
+    params.permit(:email, :password, :name, :city, :profile_photo, :phone, :about, :background, :role, :twilio_token)
   end
 
   # Helper method for forgot password method
