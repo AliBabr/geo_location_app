@@ -20,11 +20,11 @@ class Api::V1::SessionsController < ApplicationController
       percentage = (total_booking.count % 10) * 10
       image_url = ""
       image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
-      active_bookings << { session_id: booking.id, lesson: booking.lesson, percentage: percentage, image: image_url, color: booking.lesson.category.color, call_flag: call_flag, bookings: booking }
+      active_bookings << { session_id: booking.id, lesson: booking.lesson, percentage: percentage, image: image_url, color: booking.lesson.category.color, call_flag: call_flag, booking: booking }
     end
     render json: active_bookings, status: 200
   rescue StandardError => e
-    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+    render json: { message: "Error: Something went wrong...#{e} " }, status: :bad_request
   end
 
   def get_sessions_sorted_by_dates
