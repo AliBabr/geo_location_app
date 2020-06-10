@@ -13,7 +13,7 @@ Rails.application.routes.draw do
           put :forgot_password
           post :reset_password
           get :get_user
-          put :add_twilio_token
+          put :add_video_calling_id
           delete :delete_account
         end
         member do

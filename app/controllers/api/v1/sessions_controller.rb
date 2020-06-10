@@ -20,7 +20,7 @@ class Api::V1::SessionsController < ApplicationController
       percentage = (total_booking.count % 10) * 10
       image_url = ""
       image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
-      active_bookings << { session_id: booking.id, lesson: booking.lesson, percentage: percentage, image: image_url, color: booking.lesson.category.color, call_flag: call_flag, booking: booking }
+      active_bookings << { session_id: booking.id, lesson: booking.lesson, percentage: percentage, image: image_url, color: booking.lesson.category.color, call_flag: call_flag, booking: booking, video_calling_id: booking.user.video_calling_id }
     end
     render json: active_bookings, status: 200
   rescue StandardError => e
