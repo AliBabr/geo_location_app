@@ -85,7 +85,13 @@ class Api::V1::CoachesController < ApplicationController
       category.users.each do |coach|
         image_url = ""
         image_url = url_for(coach.profile_photo) if coach.profile_photo.attached?
-        all_coaches << { coach_id: coach.id, email: coach.email, name: coach.name, phone: coach.phone, profile_photo: image_url, city: coach.city, about: coach.about, background: coach.background, category: coach.category, type: coach.leason_type, rating: coach.rating, fav_count: coach.fav_count }
+        fav = Favorite.where(student_id: @current_user.id, coach_id: coach.id)
+        if fav.present?
+          fav = true
+        else
+          fav = false
+        end
+        all_coaches << { coach_id: coach.id, email: coach.email, name: coach.name, phone: coach.phone, profile_photo: image_url, city: coach.city, about: coach.about, background: coach.background, category: coach.category, type: coach.leason_type, rating: coach.rating, fav_count: coach.fav_count, is_my_fav: fav }
       end
       render json: all_coaches, status: 200
     else
