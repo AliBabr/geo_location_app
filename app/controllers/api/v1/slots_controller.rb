@@ -11,8 +11,8 @@ class Api::V1::SlotsController < ApplicationController
     if slot.save
       start_t = slot.start_time
       end_t = slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       render json: { slot_id: slot.id, day: slot.day, start_time: start_time, end_time: end_time }, status: 200
     else
       render json: slot.errors.messages, status: 400
@@ -29,8 +29,8 @@ class Api::V1::SlotsController < ApplicationController
     else
       start_t = @slot.start_time
       end_t = @slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       render json: { slot_id: @slot.id, day: @slot.day, start_time: start_time, end_time: end_time }, status: 200
     end
   rescue StandardError => e
@@ -51,56 +51,56 @@ class Api::V1::SlotsController < ApplicationController
     monday_slots.each do |slot|
       start_t = slot.start_time
       end_t = slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       monday << { slot_id: slot.id, day: slot.day, start_time: start_time, end_time: end_time }
     end
 
     tuesday_slots.each do |slot|
       start_t = slot.start_time
       end_t = slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       tuesday << { slot_id: slot.id, day: slot.day, start_time: start_time, end_time: end_time }
     end
 
     wednesday_slots.each do |slot|
       start_t = slot.start_time
       end_t = slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       wednesday << { slot_id: slot.id, day: slot.day, start_time: start_time, end_time: end_time }
     end
 
     thursday_slots.each do |slot|
       start_t = slot.start_time
       end_t = slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       thursday << { slot_id: slot.id, day: slot.day, start_time: start_time, end_time: end_time }
     end
 
     friday_slots.each do |slot|
       start_t = slot.start_time
       end_t = slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       friday << { slot_id: slot.id, day: slot.day, start_time: start_time, end_time: end_time }
     end
 
     saturday_slots.each do |slot|
       start_t = slot.start_time
       end_t = slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       saturday << { slot_id: slot.id, day: slot.day, start_time: start_time, end_time: end_time }
     end
 
     sunday_slots.each do |slot|
       start_t = slot.start_time
       end_t = slot.end_time
-      start_time = start_t.strftime("%I:%M%p")
-      end_time = end_t.strftime("%I:%M%p")
+      start_time = start_t.strftime('%H:%M:%S')
+      end_time = end_t.strftime('%H:%M:%S')
       sunday << { slot_id: slot.id, day: slot.day, start_time: start_time, end_time: end_time }
     end
 
