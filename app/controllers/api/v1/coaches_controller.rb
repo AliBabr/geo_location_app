@@ -294,7 +294,7 @@ class Api::V1::CoachesController < ApplicationController
       end
       image_url = ""
       image_url = url_for(booking.lesson.category.image) if booking.lesson.category.image.attached?
-      all_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking, coach_id: booking.coach_id , call_flag: call_flag, students: users}
+      all_sessions << { session_id: booking.id, lesson: booking.lesson, image: image_url, color: booking.lesson.category.color, booking: booking, coach_id: booking.coach_id , call_flag: call_flag, students: users, total_student: users.count}
     end
     render json: { sessions: all_sessions  }, status: 200
   rescue StandardError => e

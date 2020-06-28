@@ -84,17 +84,18 @@ class Api::V1::SessionsController < ApplicationController
   def cancel_session
     time_array = time_diff(@booking.start_time, Time.now).split(':')
     if time_array.first.to_i > 0 || time_array.second.to_i >= 5
+      response = StripePayment.new(@current_user).refund(@booking.charge_id)
       @booking.update(request_status: 'cancel', booking_status: 'cancel')
       if @booking.errors.any?
         render json: @booking.errors.messages, status: 400
-      else
-        render json: { message: "Session has been canceled!" }, status: 200
+      elsif response.present?
+        render json: { message: "Session has been cancled and payment has been refeunded successfully..!" }, status: 200
       end
     else
       render json: { message: "Session is about to start you can not cancel before 5 mintues" }, status: 200
     end
   rescue StandardError => e
-    render json: { message: "Error: Something went wrong... " }, status: :bad_request
+    render json: { message: "Error: Something went wrong... #{e}" }, status: :bad_request
   end
 
 

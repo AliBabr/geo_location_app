@@ -32,15 +32,29 @@ class Api::V1::BookingsController < ApplicationController
         booking.user_id = @current_user.id
         booking.lesson_id = @lesson.id
         booking.booking_status = "inactive"
-        booking.payment_status = "pending"
+        booking.payment_status = "transfered"
         booking.request_status = "sent"
         booking.coach_id = @lesson.user.id
         booking.price = @lesson.price
-        if booking.save
-          render json: { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: @lesson.leason_type, category: @lesson.category }, status: 200
+
+        if @current_user.stripe_cutomer_id.present?
+          response = StripePayment.new(@current_user).donate(@lesson.price, @current_user.stripe_cutomer_id)
+          if response.present?
+            booking.charge_id = response.id
+            if booking.save
+              render json: { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: @lesson.leason_type, category: @lesson.category }, status: 200
+            else
+              render json: booking.errors.messages, status: 400
+            end
+
+          else
+            render json: { message: "Something went wrong please check your card token" }
+          end
         else
-          render json: booking.errors.messages, status: 400
+          render json: { message: "Please Add first user card token..!" }, status: 400
         end
+
+
       else
         render json: {message: 'Coach is not available at your selected time..!'}, status: 400
       end
@@ -82,8 +96,13 @@ class Api::V1::BookingsController < ApplicationController
       else
         if @booking.request_status == 'accept'
           @booking.update(booking_status: "active")
+          render json: { message: "Booking request status has been saved..!" }, status: 200
+        else
+          response = StripePayment.new(@current_user).refund(@booking.charge_id)
+          if response.present?
+            render json: { message: "Request has been cancled and payment has been refeunded successfully..!" }, status: 200
+          end
         end
-        render json: { message: "Booking request status has been saved..!" }, status: 200
       end
     else
       render json: { message: "Please provide valid option" }, status: 400

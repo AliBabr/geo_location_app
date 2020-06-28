@@ -4,7 +4,7 @@ class Api::V1::PaymentsController < ApplicationController
   before_action :set_user, only: %i[add_card_token]
   before_action :is_student, only: %i[add_card_token]
   before_action :is_coach, only: %i[add_connected_account]
-  before_action :set_booking, only: %i[process_payment tranfer]
+  before_action :set_booking, only: %i[process_payment start_session]
 
   def process_payment
     if @booking.request_status == "accept"
@@ -54,11 +54,12 @@ class Api::V1::PaymentsController < ApplicationController
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
 
-  def tranfer
+  def start_session
     coach = User.find_by_id(@booking.coach_id)
     price = @booking.price
     percentage = (15.to_f / price.to_f) * 100
     price = price - percentage
+    price = price * params[:total_students].to_i
     response = StripePayment.new(@current_user).tranfer(price.to_i, coach.connected_account_id)
     if response.present?
       @booking.update(booking_status: "done")

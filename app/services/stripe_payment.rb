@@ -29,6 +29,17 @@ class StripePayment
     end
   end
 
+  def refund(charge_id)
+    response = Stripe::Refund.create({
+      charge: charge_id,
+    })
+    if response.id.present?
+      return response
+    else
+      return false
+    end
+  end
+
   def tranfer(price, token)
     response = payment_intent = Stripe::PaymentIntent.create({
       payment_method_types: ["card"],
