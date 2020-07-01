@@ -14,9 +14,9 @@ class Api::V1::UsersController < ApplicationController
         image_url = ""
         image_url = url_for(user.profile_photo) if user.profile_photo.attached?
         if user.role == "Coach"
-          render json: { user_id: user.id, role: user.role , email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, video_calling_id: user.video_calling_id , type: user.leason_type, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
+          render json: { user_id: user.id, role: user.role , email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, city: user.city, about: user.about, background: user.background, category: user.category, video_calling_id: user.video_calling_id , type: user.leason_type, "UUID" => user.id, "Authentication" => user.authentication_token, connected_account_id: user.connected_account_id }, status: 200
         else
-          render json: { user_id: user.id, role: user.role, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, video_calling_id: user.video_calling_id, city: user.city, "UUID" => user.id, "Authentication" => user.authentication_token }, status: 200
+          render json: { user_id: user.id, role: user.role, email: user.email, name: user.name, phone: user.phone, profile_photo: image_url, video_calling_id: user.video_calling_id, city: user.city, "UUID" => user.id, "Authentication" => user.authentication_token, stripe_cutomer_id: user.stripe_cutomer_id }, status: 200
         end
       else
         render json: { message: "No Email and Password matching that account were found" }, status: 400
