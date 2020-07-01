@@ -7,7 +7,7 @@ class StripePayment
   end
 
   def donate(amount, token)
-    charge = Stripe::Charge.create({ amount: amount.to_i, currency: "usd", customer: token })
+    charge = Stripe::Charge.create({ amount: amount.to_i*100, currency: "usd", customer: token })
     if charge.id.present?
       return charge
     else
@@ -54,7 +54,7 @@ class StripePayment
     # })
 
     response = Stripe::Transfer.create({
-      amount: price,
+      amount: price*100,
       currency: 'usd',
       destination: token,
       transfer_group: '{ORDER10}',
