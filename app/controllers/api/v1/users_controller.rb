@@ -127,7 +127,7 @@ class Api::V1::UsersController < ApplicationController
         render json: { message: "Please provilde Token" }, status: 404
       end
     rescue StandardError => e
-      render json: { message: "Error: Something went wrong... " }, status: :bad_request
+      render json: { message: "Error: Something went wrong... #{e}" }, status: :bad_request
     end
 
   # Method take current password and new password and update password

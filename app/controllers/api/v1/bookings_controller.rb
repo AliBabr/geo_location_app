@@ -42,6 +42,11 @@ class Api::V1::BookingsController < ApplicationController
           if response.present?
             booking.charge_id = response.id
             if booking.save
+
+              coach = User.find(@lesson.user.id)
+              registration_ids = coach.fcm_token.present? ? coach.fcm_token : 1
+              PushNotification.new(receiver, 'New Booking', 'You have a new booking', 'Booking' ).send_notification([registration_ids])
+
               render json: { booking_id: booking.id, start_time: booking.start_time, end_time: booking.end_time, payment_sttus: booking.payment_status, lesson: booking.lesson, type: @lesson.leason_type, category: @lesson.category }, status: 200
             else
               render json: booking.errors.messages, status: 400
@@ -95,6 +100,11 @@ class Api::V1::BookingsController < ApplicationController
         render json: @booking.errors.messages, status: 400
       else
         if @booking.request_status == 'accept'
+          coach = User.find(@booking.coach_id)
+          name = coach.name.present? ? coach.name : ''
+          registration_ids = @booking.user.fcm_token.present? ? @booking.user.fcm_token : 1
+          PushNotification.new(receiver, 'Booking Accepted', 'Your lesson has been accepted by' + name, 'Booking' ).send_notification([registration_ids])
+
           @booking.update(booking_status: "active")
           render json: { message: "Booking request status has been saved..!" }, status: 200
         else

@@ -19,6 +19,9 @@ class Api::V1::MessagesController < ApplicationController
       sender_profile_photo = url_for(sender.profile_photo) if sender.profile_photo.attached?
       receiver_profile_photo = url_for(receiver.profile_photo) if receiver.profile_photo.attached?
 
+      registration_ids = receiver.fcm_token.present? ? receiver.fcm_token : 1
+      PushNotification.new(receiver, 'New Message', 'You have a new message in your inbox', 'Chat' ).send_notification([registration_ids])
+
       if media_url.present?
         render json: { message_id: message.id, conversation_id: @conversation.id, sender_id: message.sender_id, receiver_id: message.receiver_id, sender_profile_photo: sender_profile_photo, receiver_profile_photo: receiver_profile_photo, media: media_url, sender_name: sender.name, receiver_name: receiver.name }, status: 200
       else
