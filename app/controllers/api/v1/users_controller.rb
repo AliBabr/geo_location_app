@@ -1,5 +1,5 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :authenticate, only: %i[update_account update_password user_data log_out get_user delete_account] # callback for validating user
+  before_action :authenticate, only: %i[update_account update_password user_data log_out get_user delete_account add_fcm_token] # callback for validating user
   before_action :forgot_validation, only: [:forgot_password]
   before_action :before_reset, only: [:reset_password]
   before_action :set_user, only: %i[get_user delete_account add_video_calling_id]
@@ -113,6 +113,22 @@ class Api::V1::UsersController < ApplicationController
   rescue StandardError => e
     render json: { message: "Error: Something went wrong... " }, status: :bad_request
   end
+
+    # Method take parameters and update user account
+    def add_fcm_token
+      if params[:fcm_token].present?
+        @current_user.update(fcm_token: params[:fcm_token])
+        if @current_user.errors.any?
+          render json: @current_user.errors.messages, status: 400
+        else
+          render json: { message: "FCM token has been successfully..!" }, status: 200          
+        end
+      else
+        render json: { message: "Please provilde Token" }, status: 404
+      end
+    rescue StandardError => e
+      render json: { message: "Error: Something went wrong... " }, status: :bad_request
+    end
 
   # Method take current password and new password and update password
   def update_password

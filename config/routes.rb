@@ -15,6 +15,7 @@ Rails.application.routes.draw do
           get :get_user
           put :add_video_calling_id
           delete :delete_account
+          put :add_fcm_token
         end
         member do
           get :reset
